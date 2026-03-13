@@ -4,6 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  let messageTimeoutId;
+
+  function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = type;
+    messageDiv.classList.remove("hidden");
+
+    if (messageTimeoutId) {
+      clearTimeout(messageTimeoutId);
+    }
+
+    messageTimeoutId = setTimeout(() => {
+      messageDiv.classList.add("hidden");
+    }, 5000);
+  }
+
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
@@ -43,20 +59,14 @@ document.addEventListener("DOMContentLoaded", () => {
               if (response.ok) {
                 // Refresh the activities list
                 fetchActivities();
-                messageDiv.textContent = `Removed ${email} from ${activity}`;
-                messageDiv.className = "success";
-                messageDiv.classList.remove("hidden");
-                setTimeout(() => messageDiv.classList.add("hidden"), 5000);
+                showMessage(`Removed ${email} from ${activity}`, "success");
               } else {
                 const result = await response.json();
-                messageDiv.textContent = result.detail || "Failed to remove participant";
-                messageDiv.className = "error";
-                messageDiv.classList.remove("hidden");
+                const errorMessage = result.detail || "Failed to remove participant";
+                showMessage(errorMessage, "error");
               }
             } catch (error) {
-              messageDiv.textContent = "Failed to remove participant. Please try again.";
-              messageDiv.className = "error";
-              messageDiv.classList.remove("hidden");
+              showMessage("Failed to remove participant. Please try again.", "error");
               console.error("Error removing:", error);
             }
           });
@@ -92,26 +102,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
-        messageDiv.textContent = result.message;
-        messageDiv.className = "success";
+        showMessage(result.message, "success");
         signupForm.reset();
         // Refresh the activities list to show updated participants
         fetchActivities();
       } else {
-        messageDiv.textContent = result.detail || "An error occurred";
-        messageDiv.className = "error";
+        const errorMessage = result.detail || "An error occurred";
+        showMessage(errorMessage, "error");
       }
-
-      messageDiv.classList.remove("hidden");
-
-      // Hide message after 5 seconds
-      setTimeout(() => {
-        messageDiv.classList.add("hidden");
-      }, 5000);
     } catch (error) {
-      messageDiv.textContent = "Failed to sign up. Please try again.";
-      messageDiv.className = "error";
-      messageDiv.classList.remove("hidden");
+      showMessage("Failed to sign up. Please try again.", "error");
       console.error("Error signing up:", error);
     }
   });
