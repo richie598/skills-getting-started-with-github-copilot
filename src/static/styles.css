@@ -101,6 +101,7 @@ section h3 {
 
 .delete-btn:hover {
   color: #b71c1c;
+  background-color: transparent;
 }
 
 .form-group {
