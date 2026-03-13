@@ -3,8 +3,51 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const themeToggle = document.getElementById("theme-toggle");
+
+  const THEME_STORAGE_KEY = "mhs-theme";
 
   let messageTimeoutId;
+
+  function applyTheme(theme) {
+    const isDark = theme === "dark";
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+
+    if (themeToggle) {
+      themeToggle.setAttribute("aria-pressed", String(isDark));
+      themeToggle.setAttribute(
+        "aria-label",
+        isDark ? "Switch to light mode" : "Switch to dark mode"
+      );
+
+      const icon = themeToggle.querySelector(".theme-icon");
+      if (icon) {
+        icon.textContent = isDark ? "☀" : "🌙";
+      }
+
+      const label = themeToggle.querySelector(".theme-label");
+      if (label) {
+        label.textContent = isDark ? "Light mode" : "Dark mode";
+      }
+    }
+  }
+
+  function initializeTheme() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const prefersDark =
+      window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const nextTheme = currentTheme === "dark" ? "light" : "dark";
+
+        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+        applyTheme(nextTheme);
+      });
+    }
+  }
 
   function showMessage(text, type) {
     messageDiv.textContent = text;
@@ -117,5 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Initialize app
+  initializeTheme();
   fetchActivities();
 });
